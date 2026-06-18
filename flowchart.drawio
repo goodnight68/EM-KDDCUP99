@@ -1,0 +1,95 @@
+<mxfile host="app.diagrams.net" modified="2026-06-18T00:00:00.000Z" agent="Mozilla/5.0" version="21.0.0">
+  <diagram name="EM算法流程图" id="em-flowchart">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="start" value="开始" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="320" y="30" width="100" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="load_data" value="加载 KDDCUP99 数据集" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13" vertex="1" parent="1">
+          <mxGeometry x="280" y="110" width="180" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="start" target="load_data">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="preprocess" value="数据预处理&lt;br&gt;标准化 + PCA 降维" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13" vertex="1" parent="1">
+          <mxGeometry x="280" y="190" width="180" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="load_data" target="preprocess">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="init" value="初始化参数&lt;br&gt;K-means++ 初始化 pi_k, mu_k, sigma_k" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13" vertex="1" parent="1">
+          <mxGeometry x="260" y="270" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="preprocess" target="init">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="estep" value="&lt;b&gt;E步&lt;/b&gt;：计算责任值&lt;br&gt;gamma_ik = pi_k * N(x_i|mu_k,sigma_k) / sum pi_j * N(x_i|mu_j,sigma_j)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="230" y="350" width="280" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="init" target="estep">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="mstep" value="&lt;b&gt;M步&lt;/b&gt;：更新参数&lt;br&gt;pi_k = N_k/N,  mu_k = sum gamma_ik * x_i / N_k&lt;br&gt;sigma_k = sum gamma_ik * (x_i-mu_k)(x_i-mu_k)^T / N_k" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="210" y="440" width="320" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="estep" target="mstep">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="loglik" value="计算对数似然&lt;br&gt;ln L = sum ln sum pi_k * N(x_i|mu_k,sigma_k)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="230" y="540" width="280" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="mstep" target="loglik">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="converge" value="是否收敛？&lt;br&gt;|lnL_new - lnL_old| &amp;lt; tol" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12" vertex="1" parent="1">
+          <mxGeometry x="260" y="630" width="220" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="loglik" target="converge">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="converge" target="estep">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="150" y="680" />
+              <mxPoint x="150" y="380" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="label_no" value="否" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=12;fontColor=#b85450;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="143" y="380" width="30" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="output" value="输出聚类结果&lt;br&gt;评估指标 + 可视化" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13" vertex="1" parent="1">
+          <mxGeometry x="280" y="760" width="180" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="converge" target="output">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="label_yes" value="是" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=12;fontColor=#82b366;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="350" y="730" width="30" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="end" value="结束" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="320" y="840" width="100" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="output" target="end">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

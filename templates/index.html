@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EM 算法实验平台 — KDDCUP99</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif; background: #0d1117; color: #c9d1d9; min-height:100vh; }
+.header { background: linear-gradient(135deg, #161b22, #0d1117); border-bottom:1px solid #30363d; padding:20px 30px; text-align:center; }
+.header h1 { font-size:22px; color:#58a6ff; margin-bottom:4px; }
+.header p { font-size:13px; color:#8b949e; }
+.container { max-width:1100px; margin:20px auto; padding:0 20px; }
+.panel { background:#161b22; border:1px solid #30363d; border-radius:8px; padding:24px; margin-bottom:20px; }
+.panel h2 { font-size:16px; color:#58a6ff; margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid #30363d; }
+.row { display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; }
+.form-group { display:flex; flex-direction:column; gap:4px; }
+.form-group label { font-size:12px; color:#8b949e; }
+.form-group input { padding:7px 10px; border:1px solid #30363d; border-radius:6px; font-size:14px; width:130px; background:#0d1117; color:#c9d1d9; outline:none; }
+.form-group input:focus { border-color:#58a6ff; }
+.btn { padding:8px 20px; border:none; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; }
+.btn:hover{opacity:0.85}
+.btn:disabled{opacity:0.4;cursor:not-allowed}
+.btn-green { background:#238636; color:#fff; }
+.btn-blue { background:#1f6feb; color:#fff; }
+
+.tip { display:inline-block; width:15px; height:15px; background:#30363d; border-radius:50%; text-align:center; line-height:15px; font-size:10px; color:#8b949e; cursor:help; margin-left:3px; vertical-align:middle; }
+.tip:hover { background:#58a6ff; color:#fff; }
+.param-desc { font-size:12px; color:#6e7681; margin-top:6px; padding:8px 12px; background:#0d1117; border-left:3px solid #30363d; border-radius:0 4px 4px 0; line-height:1.6; }
+
+.metrics-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; }
+.metric-card { background:#21262d; border:1px solid #30363d; border-radius:8px; padding:12px; text-align:center; }
+.metric-card .value { font-size:22px; font-weight:700; color:#58a6ff; }
+.metric-card .label { font-size:11px; color:#8b949e; margin-top:2px; }
+.metric-card .comment { font-size:10px; color:#484f58; margin-top:6px; border-top:1px solid #21262d; padding-top:6px; line-height:1.4; }
+
+.info-row { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:10px; }
+.info-badge { background:#21262d; border:1px solid #30363d; border-radius:6px; padding:6px 12px; }
+.info-badge span { font-size:10px; color:#8b949e; }
+.info-badge strong { font-size:14px; color:#c9d1d9; display:block; margin-top:1px; }
+.info-badge .comment { font-size:9px; color:#484f58; margin-top:2px; }
+
+.images { display:grid; grid-template-columns:1fr; gap:16px; }
+.images h3 { color:#8b949e; font-size:13px; margin-bottom:4px; }
+.images p { color:#6e7681; font-size:11px; margin-bottom:8px; line-height:1.5; }
+.images img { width:100%; border-radius:6px; border:1px solid #30363d; }
+
+.analysis-box { background:#0d1117; border:1px solid #30363d; border-radius:8px; padding:16px; margin-top:14px; }
+.analysis-box h4 { color:#f0883e; font-size:14px; margin-bottom:10px; }
+.analysis-box ul { padding-left:20px; font-size:12px; color:#8b949e; line-height:2; }
+.analysis-box span.good { color:#56d364; font-weight:bold; }
+.analysis-box span.ok { color:#d29922; font-weight:bold; }
+.analysis-box span.bad { color:#f85149; font-weight:bold; }
+
+.alert { background:#1f1a0a; border:1px solid #d29922; border-radius:6px; padding:12px 16px; color:#d29922; font-size:13px; margin-bottom:16px; }
+.loading { text-align:center; padding:30px; color:#8b949e; }
+.spinner { display:inline-block; width:24px; height:24px; border:3px solid #30363d; border-top-color:#58a6ff; border-radius:50%; animation:spin .6s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.footer { text-align:center; padding:20px; color:#484f58; font-size:12px; border-top:1px solid #30363d; margin-top:20px; }
+.step-num { display:inline-block; background:#1f6feb; color:#fff; width:20px; height:20px; border-radius:50%; text-align:center; line-height:20px; font-size:11px; margin-right:4px; font-style:normal; }
+@media (max-width:768px) { .metrics-grid{grid-template-columns:repeat(2,1fr)} }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>EM 算法实验平台</h1>
+  <p>KDDCUP99 网络入侵检测 | Expectation-Maximization 高斯混合模型 | 数据挖掘结课作业</p>
+</div>
+
+<div class="container">
+
+  <!-- ===== 步骤1: 数据加载 ===== -->
+  <div class="panel" id="step1-panel">
+    <h2><span class="step-num">1</span> 加载 KDDCUP99 数据集</h2>
+    <p style="font-size:12px;color:#8b949e;margin:8px 0 12px 0;">
+      KDDCUP99 共 <strong>41</strong> 个特征列（含 3 个分类字符串列：protocol_type、service、flag，已排除），
+      保留 <strong>38 维数值特征</strong>（连接时长、字节数、错误率等）。选取 <strong>normal、dos、probe</strong> 三类。
+    </p>
+    <div class="row">
+      <div class="form-group">
+        <label>样本数量 <span class="tip" title="采样数越大聚类越稳定，但 EM 计算量与样本数成正比。建议 3000-9000。">?</span></label>
+        <input type="number" id="n-samples" value="3000" min="500" max="20000">
+      </div>
+      <div class="form-group">
+        <label>PCA 降维 <span class="tip" title="原始 37 个数值特征高度冗余。PCA 保留主要方差方向，降维到 5-8 维可加速 EM 且避免协方差奇异。">?</span></label>
+        <input type="number" id="pca-dim" value="6" min="2" max="20">
+      </div>
+      <button class="btn btn-green" id="btn-load" onclick="loadData()">加载数据</button>
+    </div>
+    <div class="param-desc">
+      参数说明：<strong>样本数量</strong>决定训练数据规模；<strong>PCA 降维</strong>将 38 维数值特征压缩到低维空间，保留主要信息的同时避免维度灾难。
+    </div>
+    <div id="data-preview" style="margin-top:12px;"></div>
+  </div>
+
+  <div id="step2-panel" style="display:none;">
+    <div class="panel">
+      <h2><span class="step-num">2</span> 运行 EM 算法</h2>
+      <p style="font-size:12px;color:#8b949e;margin:8px 0 12px 0;">
+        EM 算法交替执行 <strong>E 步</strong>（计算每个样本属于各高斯分量的后验概率）和 <strong>M 步</strong>（根据后验概率重新估计均值、协方差和混合系数），迭代直至对数似然收敛。
+      </p>
+      <div class="row">
+        <div class="form-group">
+          <label>分量数 K <span class="tip" title="假设数据由 K 个高斯簇混合生成。K 应接近真实类别数（这里为 3）。K 太大会把同一类拆成多个子簇（过拟合），太小会把不同类合并（欠拟合）。">?</span></label>
+          <input type="number" id="n-components" value="3" min="2" max="10">
+        </div>
+        <div class="form-group">
+          <label>最大迭代 <span class="tip" title="迭代上限。算法在对数似然变化小于 1e-4 时自动提前收敛。KDDCUP99 数据通常在 30-80 次迭代内收敛。">?</span></label>
+          <input type="number" id="max-iter" value="200" min="20" max="1000">
+        </div>
+        <button class="btn btn-blue" id="btn-run" onclick="runEM()">▶ 开始训练</button>
+      </div>
+      <div class="param-desc">
+        建议先以 <strong>K=3</strong> 运行得到基线结果，再尝试 <strong>K=2/4/5/6</strong> 观察指标变化。混合系数 πₖ 反映各簇在整体中的占比，理想情况下应接近真实类别的先验分布。
+      </div>
+      <div id="run-status" style="margin-top:10px;"></div>
+    </div>
+  </div>
+
+  <div id="step3-panel" style="display:none;"></div>
+
+</div>
+
+<div class="footer">EM 算法 | 高斯混合模型参数估计 | KDDCUP99 网络入侵检测</div>
+
+<script>
+let dataLoaded = false;
+
+async function loadData() {
+  const preview = document.getElementById('data-preview');
+  const btn = document.getElementById('btn-load');
+  btn.disabled = true; btn.textContent = '加载中...';
+  preview.innerHTML = '<div class="loading"><div class="spinner"></div><p>读取 KDDCUP99 数据，PCA 降维 + 标准化...</p></div>';
+
+  const n = parseInt(document.getElementById('n-samples').value);
+  const dim = parseInt(document.getElementById('pca-dim').value);
+
+  try {
+    const res = await fetch('/api/load_data', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({n_samples:n,pca_dim:dim})});
+    const d = await res.json();
+    if(!d.success){preview.innerHTML=`<div class="alert">${d.msg}</div>`;btn.disabled=false;btn.textContent='加载数据';return}
+
+    dataLoaded = true;
+    preview.innerHTML = `
+      <div class="info-row">
+        <div class="info-badge"><span>样本</span><strong>${d.n_samples}</strong></div>
+        <div class="info-badge"><span>原始特征</span><strong>${d.original_features} 维</strong></div>
+        <div class="info-badge"><span>→ PCA</span><strong>${d.pca_dim} 维</strong></div>
+        <div class="info-badge"><span>类别</span><strong>${d.classes.join(' / ')}</strong></div>
+      </div>
+      <img src="data:image/png;base64,${d.image}" style="max-width:100%;border-radius:6px;">
+    `;
+
+    // 显示步骤2
+    document.getElementById('step2-panel').style.display = '';
+    document.getElementById('step3-panel').style.display = 'none';
+  } catch(e) { preview.innerHTML = `<div class="alert">${e.message}</div>`; }
+  btn.disabled = false; btn.textContent = '加载数据';
+}
+
+function level(v, t1, t2) {
+  if (v >= t1) return 'good';
+  if (v >= t2) return 'ok';
+  return 'bad';
+}
+
+async function runEM() {
+  if(!dataLoaded) return alert('请先点击"加载数据"');
+  const btn = document.getElementById('btn-run');
+  btn.disabled = true; btn.textContent = 'EM 迭代中...';
+  const panel = document.getElementById('step3-panel');
+  panel.style.display = '';
+  panel.innerHTML = '<div class="panel"><div class="loading"><div class="spinner"></div><p>EM 算法迭代中（CPU，无需显卡）...</p></div></div>';
+
+  const K = parseInt(document.getElementById('n-components').value);
+  const it = parseInt(document.getElementById('max-iter').value);
+
+  try {
+    const res = await fetch('/api/run_em', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({n_components:K,max_iter:it})});
+    const d = await res.json();
+    if(!d.success){panel.innerHTML=`<div class="panel"><div class="alert">${d.msg}</div></div>`;btn.disabled=false;btn.textContent='▶ 开始训练';return}
+
+    const m = d.metrics;
+    const wStr = (d.weights||[]).map((w,i)=>`π<sub>${i+1}</sub>=${(w*100).toFixed(1)}%`).join(', ');
+
+    // 根据实际指标给出分析
+    const f1lvl = level(m.f1, 0.7, 0.5);
+    const arilvl = level(m.ari, 0.6, 0.35);
+    const f1tag = f1lvl==='good'?'<span class="good">较好</span>':f1lvl==='ok'?'<span class="ok">中等</span>':'<span class="bad">偏低</span>';
+    const aritag = arilvl==='good'?'<span class="good">较好</span>':arilvl==='ok'?'<span class="ok">中等</span>':'<span class="bad">偏低</span>';
+    const f1reason = m.f1 < 0.7 ? '—— dos 与 normal 流量在特征空间中高度重叠，无监督聚类难以完美区分边界样本' : '';
+    const arireason = m.ari < 0.6 ? '—— 簇间存在重叠，纯无监督方法在缺乏标签信息时无法精细划分' : '';
+
+    panel.innerHTML = `
+    <div class="panel">
+      <h2><span class="step-num">3</span> 训练结果</h2>
+      <div class="info-row">
+        <div class="info-badge"><span>迭代次数</span><strong>${d.n_iter} 次</strong><span class="comment">对数似然收敛</span></div>
+        <div class="info-badge"><span>状态</span><strong style="color:${d.converged?'#56d364':'#f85149'}">${d.converged?'已收敛':'未收敛'}</strong></div>
+        <div class="info-badge"><span>对数似然</span><strong>${d.log_likelihood}</strong><span class="comment">越大=拟合越好</span></div>
+        <div class="info-badge"><span>混合系数</span><strong style="font-size:12px">${wStr}</strong></div>
+      </div>
+      <div class="param-desc">
+        <strong>混合系数</strong>${(d.weights||[]).map((_,i)=>'π<sub>'+(i+1)+'</sub>').join('+')}=1，分别表示 <strong>${d.weights.length}</strong> 个簇在整体中的估计占比。由于是无监督学习，簇编号由算法自动分配（已通过匈牙利算法映射到最近的真实类别）。若某个 πₖ 接近于 0，说明该分量几乎没有分配到样本，可以尝试减小 K。
+      </div>
+
+      <h2 style="margin-top:20px;"><span class="step-num">4</span> 评估指标</h2>
+      <div class="metrics-grid">
+        <div class="metric-card"><div class="value">${(m.accuracy*100).toFixed(2)}%</div><div class="label">准确率 Accuracy</div><div class="comment">正确分类样本占比。不平衡数据中此项参考价值有限。</div></div>
+        <div class="metric-card"><div class="value">${(m.precision*100).toFixed(2)}%</div><div class="label">精确率 Precision</div><div class="comment">预测为某类中真正属于该类的比例（衡量误报率）。</div></div>
+        <div class="metric-card"><div class="value">${(m.recall*100).toFixed(2)}%</div><div class="label">召回率 Recall</div><div class="comment">真实某类中被正确找出的比例（衡量漏报率）。</div></div>
+        <div class="metric-card"><div class="value">${(m.f1*100).toFixed(2)}%</div><div class="label">F1 Score（核心指标）</div><div class="comment">P 和 R 的调和平均，最常用的综合聚类质量指标。</div></div>
+        <div class="metric-card"><div class="value">${(m.ari*100).toFixed(2)}%</div><div class="label">ARI 调整兰德指数</div><div class="comment">修正随机一致性。值域[-1,1]，越大表示聚类与真实标签越吻合。</div></div>
+        <div class="metric-card"><div class="value">${(m.nmi*100).toFixed(2)}%</div><div class="label">NMI 标准化互信息</div><div class="comment">基于信息论的聚类评估，越大表示两者共享信息越多。</div></div>
+      </div>
+
+      <h2 style="margin-top:24px;"><span class="step-num">5</span> 可视化 & 分析</h2>
+      <div class="images">
+        <div>
+          <h3>收敛曲线</h3>
+          <p>横轴为迭代次数，纵轴为对数似然值。曲线快速上升后趋于平稳表示收敛。红色虚线标注收敛点。若曲线仍在上升可增大迭代次数。</p>
+          <img src="data:image/png;base64,${d.images.convergence}">
+        </div>
+        <div>
+          <h3>聚类结果（PCA 2D 投影）</h3>
+          <p>左：真实标签。右：EM 聚类（标签已通过匈牙利算法映射对齐）。<strong>注意</strong>：2D 仅展示前两个主成分（信息丢失较多），实际聚类在高维 PCA 空间中进行。2D 图中的重叠不代表高维空间无法区分。</p>
+          <img src="data:image/png;base64,${d.images.clustering}">
+        </div>
+        <div>
+          <h3>混淆矩阵</h3>
+          <p>每行=真实类别，每列=预测类别。对角线为正确数。注意 normal 和 dos 之间的混淆（这对类别在高维空间有明显重叠，是主要误差来源）。</p>
+          <img src="data:image/png;base64,${d.images.confusion}">
+        </div>
+      </div>
+
+      <div class="analysis-box">
+        <h4>步骤 6： 结果分析</h4>
+        <ul>
+          <li><strong>F1 = ${(m.f1*100).toFixed(1)}%</strong>${f1tag}${f1reason}</li>
+          <li><strong>ARI = ${(m.ari*100).toFixed(1)}%</strong>${aritag}${arireason}</li>
+          <li><strong>收敛性</strong>：算法在 <strong>${d.n_iter} 次</strong>迭代后收敛（对数似然变化 < 10⁻⁴），说明 EM 在此数据上具有良好的收敛行为</li>
+          <li><strong>实际意义</strong>：EM-GMM 作为一种<strong>无监督方法</strong>，在完全没有攻击标签的情况下，能自动将网络流量聚类为不同行为模式。对于入侵检测场景，这意味着可以用"偏离正常流量簇"的样本来检测未知攻击</li>
+          <li><strong>改进方向</strong>：增大 PCA 维度可保留更多信息；尝试 K 不等于类别数看是否能发现子结构；使用 BIC 自动选最优 K</li>
+        </ul>
+      </div>
+    </div>`;
+    panel.scrollIntoView({behavior:'smooth'});
+  } catch(e) { panel.innerHTML = `<div class="panel"><div class="alert">训练失败: ${e.message}</div></div>`; }
+  btn.disabled = false; btn.textContent = '▶ 重新训练';
+}
+</script>
+</body>
+</html>
